@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>The Gopher Network</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+
+    <script src="https://www.gstatic.com/firebasejs/5.9.0/firebase.js"></script>
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyBjmw96Ocv4MH1bScT2r0z6QQSbBJ0nS2c",
+            authDomain: "shopping-list-234812.firebaseapp.com",
+            databaseURL: "https://shopping-list-234812.firebaseio.com",
+            projectId: "shopping-list-234812",
+            storageBucket: "shopping-list-234812.appspot.com",
+            messagingSenderId: "924167992589"
+        };
+        firebase.initializeApp(config);
+    </script>
+
+    <script src="https://cdn.firebase.com/libs/firebaseui/2.6.2/firebaseui.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/2.6.2/firebaseui.css" />
+
+    <script src="/static/index.js"></script>
+</head>
+
+<body>
+    <h1>The Potato Network</h1>
+
+    <img id="logo" src="/static/gcp-gopher.svg" width="100">
+
+    <div id="firebaseui-auth-container"></div>
+
+    <div id="sign-in"></div>
+    <div>
+      <span id="account-details"></span>
+      <button id="sign-out" hidden=true>Sign Out</button>
+    </div>
+
+    {{with .Notice}}<div id="notice">{{.}}</div>{{end}}
+
+    <form id="post-form" action="/" method="post" hidden=true>
+        <div>Message:<input name="message"></div>
+        <input type="hidden" name="token" id="token">
+        <input type="submit">
+    </form>
+    {{with .Posts}}
+    <ol>
+        {{range .}}
+        <li>
+            <cite>{{.Author}}</cite>
+            <p>{{.Message}}</p>
+        </li>
+        {{end}}
+    </ol>
+    {{end}}
+</body>
+
+</html>
