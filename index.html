@@ -43,19 +43,22 @@
     <div id="notice">{{.}}</div>
     {{end}}
 
-    <form id="post-form" action="/" method="post" hidden=true>
-        <div>Item:
-            <input name="item">
-        </div>
-        <input type="hidden" name="token" id="token">
-        <input type="submit">
-    </form>
 
-    {{with .ShoppingLists}}
-        {{ range .}}
-        <p>{{.Name}}, created at <span>{{.CreatedAt}}</span></p>
 
+    {{range $index, $shoppingList := .ShoppingLists}}
+        <p>{{$shoppingList.Name}}, created at <span>{{$shoppingList.CreatedAt}}</span></p>
+        <ul>
+        {{range $ind, $item := $shoppingList.Items }}
+            <li>{{if $item.Striked}}<strike>{{end}}{{$item.Name}}{{if $item.Striked}}</strike>{{end}}</li>
         {{end}}
+            <li>
+                <form id="post-form" action="/" method="post" hidden=true>
+                    <div>Add item: <input name="item"></div>
+                    <input type="hidden" name="token" id="token">
+                    <button type="submit" name="add-item">Add item</button>
+                </form>
+            </li>
+        </ul>
     {{end}}
 </body>
 
