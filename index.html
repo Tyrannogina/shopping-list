@@ -2,7 +2,8 @@
 <html>
 
 <head>
-    <title>The Gopher Network</title>
+    <title>Go Shopping!</title>
+    <link href="/static/favicon.ico" type="image/x-icon" rel="icon" />
     <link rel="stylesheet" type="text/css" href="/static/style.css">
 
     <script src="https://www.gstatic.com/firebasejs/5.9.0/firebase.js"></script>
@@ -26,34 +27,35 @@
 </head>
 
 <body>
-    <h1>The Potato Network</h1>
+    <h1>Go Shopping!</h1>
 
-    <img id="logo" src="/static/gcp-gopher.svg" width="100">
+    <img id="logo" src="/static/groceries.svg" width="100">
 
     <div id="firebaseui-auth-container"></div>
 
     <div id="sign-in"></div>
     <div>
-      <span id="account-details"></span>
-      <button id="sign-out" hidden=true>Sign Out</button>
+        <span id="account-details"></span>
+        <button id="sign-out" hidden=true>Sign Out</button>
     </div>
 
-    {{with .Notice}}<div id="notice">{{.}}</div>{{end}}
+    {{with .Notice}}
+    <div id="notice">{{.}}</div>
+    {{end}}
 
     <form id="post-form" action="/" method="post" hidden=true>
-        <div>Message:<input name="message"></div>
+        <div>Item:
+            <input name="item">
+        </div>
         <input type="hidden" name="token" id="token">
         <input type="submit">
     </form>
-    {{with .Posts}}
-    <ol>
-        {{range .}}
-        <li>
-            <cite>{{.Author}}</cite>
-            <p>{{.Message}}</p>
-        </li>
+
+    {{with .ShoppingLists}}
+        {{ range .}}
+        <p>{{.Name}}, created at <span>{{.CreatedAt}}</span></p>
+
         {{end}}
-    </ol>
     {{end}}
 </body>
 
