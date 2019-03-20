@@ -1,7 +1,10 @@
 <!doctype html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
     <title>Go Shopping!</title>
     <link href="/favicon.ico" type="image/x-icon" rel="icon" />
     <link rel="stylesheet" type="text/css" href="/static/style.css">
@@ -22,44 +25,74 @@
 
     <script src="https://cdn.firebase.com/libs/firebaseui/2.6.2/firebaseui.js"></script>
     <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/2.6.2/firebaseui.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
 
     <script src="/static/index.js"></script>
 </head>
 
 <body>
-    <h1>Go Shopping!</h1>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm">
+                <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+                    <a class="navbar-brand" href="#">
+                        <img class="d-inline-block align-top" id="logo" alt="" src="/static/groceries.svg" width="100">
+                        <h1 class="navbar-text display-1 m-l-4">Go Shopping!</h1>
+                    </a>
 
-    <img id="logo" src="/static/groceries.svg" width="100">
+                    <div id="firebaseui-auth-container"></div>
 
-    <div id="firebaseui-auth-container"></div>
+                    <div id="sign-in"></div>
 
-    <div id="sign-in"></div>
-    <div>
-        <span id="account-details"></span>
-        <button id="sign-out" hidden=true>Sign Out</button>
+                    <p class="navbar-text">
+                        <span id="account-details"></span>
+                    </p>
+
+                    <button class="btn btn-info mt-3" id="sign-out" hidden=true>Sign Out</button>
+                </nav>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div id="firebaseui-auth-container"></div>
+                <p class="navbar-text">
+                    <span id="account-details"></span>
+                </p>
+            </div>
+            <div class="col-sm">
+
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-4">
+                {{with .Notice}}
+                <div id="notice">{{.}}</div>
+                {{end}}
+
+                <h3>My shopping list:</h3>
+                <ul class="list-group list-group-flush">
+                    {{range $index, $item := .Items}}
+                    <li class="list-group-item">{{$item.Name}}</li>
+                    {{end}}
+                    <li class="list-group-item">
+                        <form id="post-form" action="/" method="post" hidden=true>
+                            <input class="form-control form-control-sm" type="text" name="item" id="item" placeholder="Add a new item">
+                            <input type="hidden" name="token" id="token">
+                            <button type="submit" class="btn btn-info mt-3" name="add-item">Add item</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 
-    {{with .Notice}}
-    <div id="notice">{{.}}</div>
-    {{end}}
-
-
-
-    {{range $index, $shoppingList := .ShoppingLists}}
-        <p>{{$shoppingList.Name}}, created at <span>{{$shoppingList.CreatedAt}}</span></p>
-        <ul>
-        {{range $ind, $item := $shoppingList.Items }}
-            <li>{{if $item.Striked}}<strike>{{end}}{{$item.Name}}{{if $item.Striked}}</strike>{{end}}</li>
-        {{end}}
-            <li>
-                <form id="post-form" action="/" method="post" hidden=true>
-                    <div>Add item: <input name="item"></div>
-                    <input type="hidden" name="token" id="token">
-                    <button type="submit" name="add-item">Add item</button>
-                </form>
-            </li>
-        </ul>
-    {{end}}
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
 </body>
 
 </html>

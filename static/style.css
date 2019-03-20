@@ -1,15 +1,6 @@
-body {
-    font-family: Arial, sans-serif;
-    color: black;
-}
-
 div.mdl-progress::after {
     display: block;
     content: 'Authenticating...';
     margin: 30px auto;
     text-align: center;
   }
-
-strike {
-    text-decoration:line-through;
-    }
