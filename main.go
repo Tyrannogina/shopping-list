@@ -48,8 +48,13 @@ type ShoppingList struct {
 }
 
 func main() {
+	http.HandleFunc("/favicon.ico", faviconHandler)
 	http.HandleFunc("/", indexHandler)
 	appengine.Main() // Starts the server to receive requests
+}
+
+func faviconHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "favicon.ico")
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
