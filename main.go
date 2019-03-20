@@ -21,18 +21,16 @@ var (
 	indexTemplate = template.Must(template.ParseFiles("index.html"))
 )
 
-type Post struct {
-	Author  string
-	UserID  string
-	Message string
-	Posted  time.Time
+type templateParams struct {
+	Notice        string
+	ItemName      string
+	ShoppingLists []ShoppingList
 }
 
-type templateParams struct {
-	Notice  string
-	Name    string
-	Message string
-	Posts   []Post
+// User : owner of the shopping list, has a name and a UserID
+type User struct {
+	Name   string
+	UserID string
 }
 
 // Item : Item of the shopping list. Contains a name and can be striked through.
@@ -43,8 +41,7 @@ type Item struct {
 
 // ShoppingList : allows to save several items. Has an author with their corresponding id, creation time, name and list of items.
 type ShoppingList struct {
-	Author    string
-	UserID    string
+	//Owner     User,
 	Name      string
 	Items     []Item
 	CreatedAt time.Time
@@ -64,11 +61,12 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 	params := templateParams{}
 
-	q := datastore.NewQuery("Post").Order("-Posted").Limit(20)
-	if _, err := q.GetAll(ctx, &params.Posts); err != nil {
-		log.Errorf(ctx, "Getting posts: %v", err)
+	q := datastore.NewQuery("ShoppingList").Order("-CreatedAt").Limit(20)
+
+	if _, err := q.GetAll(ctx, &params.ShoppingLists); err != nil {
+		log.Errorf(ctx, "Getting shopping lists: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		params.Notice = "Couldn't get latest posts. Refresh?"
+		params.Notice = "Couldn't get latest shopping Lists. Refresh?"
 		indexTemplate.Execute(w, params)
 		return
 	}
@@ -78,72 +76,76 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message := r.FormValue("message")
+	itemName := r.FormValue("item")
 
-	// Create a new Firebase App.
-	app, err := firebase.NewApp(ctx, firebaseConfig)
-	if err != nil {
-		params.Notice = "Couldn't authenticate 1. Try logging in again?"
-		log.Errorf(ctx, "firebase.NewApp: %v", err)
-		params.Message = message // Preserve their message so they can try again.
-		indexTemplate.Execute(w, params)
-		return
-	}
-	// Create a new authenticator for the app.
-	auth, err := app.Auth(ctx)
-	if err != nil {
-		params.Notice = "Couldn't authenticate 2. Try logging in again?"
-		log.Errorf(ctx, "app.Auth: %v", err)
-		params.Message = message // Preserve their message so they can try again.
-		indexTemplate.Execute(w, params)
-		return
-	}
-	// Verify the token passed in by the user is valid.
-	tok, err := auth.VerifyIDTokenAndCheckRevoked(ctx, r.FormValue("token"))
-	if err != nil {
-		params.Notice = "Couldn't authenticate 3. Try logging in again?"
-		log.Errorf(ctx, "auth.VerifyIDAndCheckRevoked: %v", err)
-		params.Message = message // Preserve their message so they can try again.
-		indexTemplate.Execute(w, params)
-		return
-	}
-	// Use the validated token to get the user's information.
-	user, err := auth.GetUser(ctx, tok.UID)
-	if err != nil {
-		params.Notice = "Couldn't authenticate 4. Try logging in again?"
-		log.Errorf(ctx, "auth.GetUser: %v", err)
-		params.Message = message // Preserve their message so they can try again.
-		indexTemplate.Execute(w, params)
-		return
-	}
-
-	post := Post{
-		UserID:  user.UID, // Include UserID in case Author isn't unique.
-		Author:  user.DisplayName,
-		Message: message,
-		Posted:  time.Now(),
-	}
-	params.Name = post.Author
-
-	if post.Message == "" {
+	if (itemName) == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		params.Notice = "No message provided"
 		indexTemplate.Execute(w, params)
 		return
 	}
 
-	key := datastore.NewIncompleteKey(ctx, "Post", nil)
-	if _, err := datastore.Put(ctx, key, &post); err != nil {
-		log.Errorf(ctx, "datastore.Put: %v", err)
-
-		w.WriteHeader(http.StatusInternalServerError)
-		params.Notice = "Couldn't add new post. Try again?"
-		params.Message = post.Message // Preserve their message so they can try again.
+	// Create a new Firebase App.
+	app, err := firebase.NewApp(ctx, firebaseConfig)
+	if err != nil {
+		params.Notice = "Couldn't authenticate 1. Try logging in again?"
+		log.Errorf(ctx, "firebase.NewApp: %v", err)
+		params.ItemName = itemName // Preserve their input so they can try again.
+		indexTemplate.Execute(w, params)
+		return
+	}
+	// Create a new authenticator for the app.
+	authClient, err := app.Auth(ctx)
+	if err != nil {
+		params.Notice = "Couldn't authenticate 2. Try logging in again?"
+		log.Errorf(ctx, "app.Auth: %v", err)
+		params.ItemName = itemName // Preserve their input so they can try again.
 		indexTemplate.Execute(w, params)
 		return
 	}
 
-	params.Posts = append([]Post{post}, params.Posts...)
-	params.Notice = fmt.Sprintf("Thank you for your submission, %s!", post.Author)
+	// Verify the token passed in by the user is valid.
+	tok, err := authClient.VerifyIDTokenAndCheckRevoked(ctx, r.FormValue("token"))
+	if err != nil {
+		params.Notice = fmt.Sprintf("Couldn't authenticate 3. Try logging in again? auth.VerifyIDAndCheckRevoked: %v", err)
+		log.Errorf(ctx, "auth.VerifyIDAndCheckRevoked: %v", err)
+		params.ItemName = itemName // Preserve their input so they can try again.
+		indexTemplate.Execute(w, params)
+		return
+	}
+	// Use the validated token to get the user's information.
+	user, err := authClient.GetUser(ctx, tok.UID)
+	if err != nil {
+		params.Notice = "Couldn't authenticate 4. Try logging in again?"
+		log.Errorf(ctx, "auth.GetUser: %v", err)
+		params.ItemName = itemName // Preserve their input so they can try again.
+		indexTemplate.Execute(w, params)
+		return
+	}
+
+	// Insert new shopping list if one does not exist already
+	if len(params.ShoppingLists) == 0 {
+		name := "My groceries"
+
+		shoppingList := ShoppingList{
+			Name:      name,
+			CreatedAt: time.Now(),
+		}
+
+		key := datastore.NewIncompleteKey(ctx, "ShoppingList", nil)
+
+		if _, err := datastore.Put(ctx, key, &shoppingList); err != nil {
+			log.Errorf(ctx, "datastore.Put: %v", err)
+			params.Notice = fmt.Sprintf("Thank you for your submission, %s!", user.DisplayName)
+			w.WriteHeader(http.StatusInternalServerError)
+			params.Notice = "Couldn't add new shopping list. Try again?"
+			indexTemplate.Execute(w, params)
+			return
+		}
+
+		params.ShoppingLists = append([]ShoppingList{shoppingList}, params.ShoppingLists...)
+	}
+
+	params.Notice = fmt.Sprintf("length: %v\nlist: %v", len(params.ShoppingLists), params.ShoppingLists) //user.DisplayName)
 	indexTemplate.Execute(w, params)
 }
