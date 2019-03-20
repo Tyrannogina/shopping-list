@@ -146,6 +146,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		params.ShoppingLists = append([]ShoppingList{shoppingList}, params.ShoppingLists...)
 	}
 
-	params.Notice = fmt.Sprintf("length: %v\nlist: %v", len(params.ShoppingLists), params.ShoppingLists) //user.DisplayName)
+	params.Notice = fmt.Sprintf("Hello %s", user.DisplayName)
 	indexTemplate.Execute(w, params)
 }
