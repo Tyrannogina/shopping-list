@@ -70,7 +70,7 @@
                 <div id="notice">{{.}}</div>
                 {{end}}
 
-                <h3>My shopping list:</h3>
+                <h3 class="display-4">My shopping list:</h3>
                 <ul class="list-group list-group-flush">
                     {{range $index, $item := .Items}}
                     <li class="list-group-item">{{$item.Name}}</li>
@@ -80,6 +80,11 @@
                             <input class="form-control form-control-sm" type="text" name="item" id="item" placeholder="Add a new item">
                             <input type="hidden" name="token" id="token">
                             <button type="submit" class="btn btn-info mt-3" name="add-item">Add item</button>
+                        </form>
+                        <form id="delete-form" action="/" method="POST" hidden=true>
+                            <input type="hidden" name="token" id="token">
+                            <input type="hidden" name="delete" id="delete" value="1">
+                            <button type="submit" class="btn btn-info mt-3" name="delete-all-item">Delete all items</button>
                         </form>
                     </li>
                 </ul>

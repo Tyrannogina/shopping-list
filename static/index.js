@@ -16,6 +16,7 @@ window.addEventListener('load', function () {
         if (user) {
             document.getElementById('sign-out').hidden = false;
             document.getElementById('post-form').hidden = false;
+            document.getElementById('delete-form').hidden = false;
             document.getElementById('account-details').textContent =
                 'Signed in as ' + user.displayName + ' (' + user.email + ')';
             user.getIdToken().then(function (accessToken) {
@@ -29,6 +30,7 @@ window.addEventListener('load', function () {
             // Update the login state indicators.
             document.getElementById('sign-out').hidden = true;
             document.getElementById('post-form').hidden = true;
+            document.getElementById('delete-form').hidden = true;
             document.getElementById('account-details').textContent = '';
         }
     }, function (error) {

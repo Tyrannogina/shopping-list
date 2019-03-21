@@ -16,11 +16,8 @@ You can run the application locally by following this steps:
 - Datastore
 
 ## TODO:
-- Delete shopping lists.
-- Add items.
-- Delete items.
-- Delete all items in a list.
-- Create a minimal UI.
+- Delete individual items.
+- Structure the code in packages once I figure imports.
 
 ## Known issues/bugs
 - User token validation fails when request is sent from localhost, which is quite particular since the user is able to log in and out normally.
